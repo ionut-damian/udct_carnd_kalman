@@ -4,7 +4,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <OutDir>$(SolutionDir)..\products\msbuild.windows.$(PlatformShortName).$(PlatformToolset).$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\products\msbuild.windows.$(PlatformShortName).$(PlatformToolset).$(Configuration)\tmp\</IntDir>
+    <IntDir>$(SolutionDir)..\products\msbuild.windows.$(PlatformShortName).$(PlatformToolset).$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
