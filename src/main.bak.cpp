@@ -35,8 +35,8 @@ int main()
 
   // used to compute the RMSE later
   Tools tools;
-  vector<VectorXd> estimations;
-  vector<VectorXd> ground_truth;
+  vector<Eigen::VectorXd> estimations;
+  vector<Eigen::VectorXd> ground_truth;
 
   h.onMessage([&fusionEKF,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -68,7 +68,7 @@ int main()
 
     	  if (sensor_type.compare("L") == 0) {
       	  		meas_package.sensor_type_ = MeasurementPackage::LASER;
-          		meas_package.raw_measurements_ = VectorXd(2);
+          		meas_package.raw_measurements_ = Eigen::VectorXd(2);
           		float px;
       	  		float py;
           		iss >> px;
@@ -79,7 +79,7 @@ int main()
           } else if (sensor_type.compare("R") == 0) {
 
       	  		meas_package.sensor_type_ = MeasurementPackage::RADAR;
-          		meas_package.raw_measurements_ = VectorXd(3);
+          		meas_package.raw_measurements_ = Eigen::VectorXd(3);
           		float ro;
       	  		float theta;
       	  		float ro_dot;
@@ -98,7 +98,7 @@ int main()
     	  iss >> y_gt;
     	  iss >> vx_gt;
     	  iss >> vy_gt;
-    	  VectorXd gt_values(4);
+    	  Eigen::VectorXd gt_values(4);
     	  gt_values(0) = x_gt;
     	  gt_values(1) = y_gt; 
     	  gt_values(2) = vx_gt;
@@ -110,7 +110,7 @@ int main()
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
 
-    	  VectorXd estimate(4);
+    	  Eigen::VectorXd estimate(4);
 
     	  double p_x = fusionEKF.ekf_.x_(0);
     	  double p_y = fusionEKF.ekf_.x_(1);
@@ -124,7 +124,7 @@ int main()
     	  
     	  estimations.push_back(estimate);
 
-    	  VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
+    	  Eigen::VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
 
           json msgJson;
           msgJson["estimate_x"] = p_x;
