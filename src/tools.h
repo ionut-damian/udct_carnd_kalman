@@ -1,34 +1,32 @@
 #ifndef TOOLS_H_
 #define TOOLS_H_
+
 #include <vector>
 #include "Eigen/Dense"
+#include "measurement_package.h"
 
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
-using namespace std;
-
-class Tools {
+class Tools
+{
 public:
-  /**
-  * Constructor.
-  */
-  Tools();
+    /**
+    * A helper method to calculate RMSE.
+    */
+    static Eigen::VectorXd CalculateRMSE(const std::vector<Eigen::VectorXd> &estimations, const std::vector<Eigen::VectorXd> &ground_truth);
 
-  /**
-  * Destructor.
-  */
-  virtual ~Tools();
+    /**
+    * A helper method to calculate Jacobians.
+    */
+    static Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd& x_state);
 
-  /**
-  * A helper method to calculate RMSE.
-  */
-  VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
+    /**
+    * A helper method to compute the radar measurement vector from the (predicted) state vector
+    */
+    static Eigen::MatrixXd ComputeRadarMeasVector(const Eigen::VectorXd& x_state);
 
-  /**
-  * A helper method to calculate Jacobians.
-  */
-  MatrixXd CalculateJacobian(const VectorXd& x_state);
-
+    /**
+    * A helper method to compute the state vector from the radar measurement vector
+    */
+    static Eigen::MatrixXd ComputeRadarStateVector(const Eigen::VectorXd& z);
 };
 
 #endif /* TOOLS_H_ */

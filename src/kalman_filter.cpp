@@ -1,42 +1,35 @@
 #include "kalman_filter.h"
 
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
-
-// Please note that the Eigen library does not initialize 
-// VectorXd or MatrixXd objects with zeros upon creation.
-
 KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
 
-void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
-                        MatrixXd &H_in, MatrixXd &R_in, MatrixXd &Q_in) {
-  x_ = x_in;
-  P_ = P_in;
-  F_ = F_in;
-  H_ = H_in;
-  R_ = R_in;
-  Q_ = Q_in;
+void KalmanFilter::Predict() 
+{
+    x_ = F_ * x_;
+    P_ = F_ * P_ * F_.transpose() + Q_;
 }
 
-void KalmanFilter::Predict() {
-  /**
-  TODO:
-    * predict the state
-  */
+void KalmanFilter::Update(const Eigen::VectorXd &y, const Eigen::MatrixXd &H, const Eigen::MatrixXd &R)
+{
+    Eigen::MatrixXd Ht = H.transpose();
+    Eigen::MatrixXd S = H * P_ * Ht + R;
+    Eigen::MatrixXd Si = S.inverse();
+    Eigen::MatrixXd PHt = P_ * Ht;
+    Eigen::MatrixXd K = PHt * Si;
+
+    //new estimate
+    x_ = x_ + (K * y);
+    long x_size = x_.size();
+    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(x_size, x_size);
+    P_ = (I - K * H) * P_;
 }
 
-void KalmanFilter::Update(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Kalman Filter equations
-  */
-}
-
-void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Extended Kalman Filter equations
-  */
+void KalmanFilter::setQ(double dt, double sigma_ax, double sigma_ay)
+{
+	Q_ = Eigen::MatrixXd(4, 4);
+	Q_ << (pow(dt, 4) / 4) * sigma_ax, 0, (pow(dt, 3) / 2) * sigma_ax, 0,
+		0, (pow(dt, 4) / 4) * sigma_ax, 0, (pow(dt, 3) / 2) * sigma_ax,
+		(pow(dt, 3) / 2) * sigma_ax, 0, (pow(dt, 2) / 1) * sigma_ax, 0,
+		0, (pow(dt, 3) / 2) * sigma_ax, 0, (pow(dt, 2) / 1) * sigma_ax;
 }
