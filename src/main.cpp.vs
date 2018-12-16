@@ -27,6 +27,8 @@ std::string hasData(std::string s)
     return "";
 }
 
+int id = 1;
+
 int main()
 {
     uWS::Hub h;
@@ -38,7 +40,7 @@ int main()
     std::vector<Eigen::VectorXd> estimations;
     std::vector<Eigen::VectorXd> ground_truth;
 
-    h.onMessage([&fusionEKF, &estimations, &ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
+    h.onMessage([&fusionEKF, &estimations, &ground_truth](uWS::WebSocket<uWS::SERVER>* ws, char *data, size_t length, uWS::OpCode opCode)
     {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
@@ -110,6 +112,22 @@ int main()
                     gt_values(3) = vy_gt;
                     ground_truth.push_back(gt_values);
 
+                    std::cout << "==============================" << std::endl;
+                    if (meas_package.sensor_type_ == MeasurementPackage::LASER)
+                    {
+                        std::cout << "meas #" << id++ << " (LASER): "
+                            << "[" << meas_package.raw_measurements_(0) << ", " << meas_package.raw_measurements_(1) << "]"
+                            << std::endl;
+                    }
+                    else
+                    {
+                        Eigen::VectorXd x_radar = Tools::ComputeRadarStateVector(meas_package.raw_measurements_);
+                        std::cout << "meas #" << id++ << " (RADAR): "
+                            << "polar [" << meas_package.raw_measurements_(0) << ", " << meas_package.raw_measurements_(1) << ", " << meas_package.raw_measurements_(2) << "], "
+                            << "cart [" << x_radar(0) << ", " << x_radar(1) << "]"
+                            << std::endl;
+                    }
+
                     //Call ProcessMeasurment(meas_package) for Kalman filter
                     fusionEKF.ProcessMeasurement(meas_package);
 
@@ -139,17 +157,16 @@ int main()
                     msgJson["rmse_y"] = RMSE(1);
                     msgJson["rmse_vx"] = RMSE(2);
                     msgJson["rmse_vy"] = RMSE(3);
-                    auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
-                    // std::cout << msg << std::endl;
-                    ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-
+                    auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";                   
+                    
+                    ws->send(msg.data(), msg.length(), uWS::OpCode::TEXT);
                 }
             }
             else
             {
 
                 std::string msg = "42[\"manual\",{}]";
-                ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+                ws->send(msg.data(), msg.length(), uWS::OpCode::TEXT);
             }
         }
 
@@ -171,19 +188,20 @@ int main()
         }
     });
 
-    h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req)
+    h.onConnection([&h](uWS::WebSocket<uWS::SERVER>* ws, uWS::HttpRequest req)
     {
         std::cout << "Connected!!!" << std::endl;
     });
 
-    h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length)
+    h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER>* ws, int code, char *message, size_t length)
     {
-        ws.close();
+        ws->close();
         std::cout << "Disconnected" << std::endl;
     });
 
     int port = 4567;
-    if (h.listen(port))
+    auto host = "127.0.0.1";
+    if (h.listen(host, port))
     {
         std::cout << "Listening to port " << port << std::endl;
     }

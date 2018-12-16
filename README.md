@@ -12,7 +12,8 @@ Tips for setting up your environment can be found [here](https://classroom.udaci
 ---
 
 ## Note
-The main.cpp has been altered to work with uWebSockets v0.14.8-2. If you have an older version, replace *src/main.cpp* with *src/main.bak.cpp*.
+
+The project is set up to work with ubuntu/gcc as default. If you want to use Visual Studio, replace *main.cpp* with *main.cpp.vs*.
 
 ---
 
